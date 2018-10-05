@@ -8,14 +8,14 @@
 
 #import "LTHMonthYearPickerView.h"
 
-#define kMonthColor [UIColor grayColor]
-#define kYearColor [UIColor darkGrayColor]
-#define kMonthFont [UIFont systemFontOfSize: 22.0]
-#define kYearFont [UIFont systemFontOfSize: 22.0]
+#define kMonthColor [UIColor blackColor]
+#define kYearColor [UIColor blackColor]
+#define kMonthFont [UIFont systemFontOfSize: 23.0]
+#define kYearFont [UIFont systemFontOfSize: 23.0]
 #define kWinSize [UIScreen mainScreen].bounds.size
 
-const NSUInteger kMonthComponent = 0;
-const NSUInteger kYearComponent = 1;
+const NSUInteger kMonthComponent = 1;
+const NSUInteger kYearComponent = 0;
 const NSUInteger kMinYear = 1950;
 const NSUInteger kMaxYear = 2080;
 const CGFloat kRowHeight = 30.0;
@@ -42,27 +42,27 @@ const CGFloat kRowHeight = 30.0;
     if (!_initialValues) _initialValues = @{ @"month" : _months[_monthIndex],
                                              @"year" : _years[_yearIndex] };
     NSUInteger (^month)(void) = ^NSUInteger() {
-        return [pickerView selectedRowInComponent: 0];
+        return [pickerView selectedRowInComponent: kMonthComponent];
     };
     NSUInteger (^year)(void) = ^NSUInteger() {
-        return [pickerView selectedRowInComponent: 1];
+        return [pickerView selectedRowInComponent: kYearComponent];
     };
     
     if (year() == 0 && month() < _minComponents.month - 1) {
         _monthIndex = _minComponents.month - 1;
-        [pickerView selectRow:_monthIndex inComponent:0 animated:YES];
+        [pickerView selectRow:_monthIndex inComponent:kMonthComponent animated:YES];
     }
     else if (year() == _years.count - 1 && month() > _maxComponents.month - 1) {
         _monthIndex = _maxComponents.month - 1;
-        [pickerView selectRow:_monthIndex inComponent:0 animated:YES];
+        [pickerView selectRow:_monthIndex inComponent:kMonthComponent animated:YES];
     }
     
-    if (component == 0) {
+    if (component == kMonthComponent) {
         _monthIndex = month();
         if ([self.delegate respondsToSelector: @selector(pickerDidSelectMonth:)])
             [self.delegate pickerDidSelectMonth: _months[_monthIndex]];
     }
-    else if (component == 1) {
+    else if (component == kYearComponent) {
         _yearIndex = year();
         if ([self.delegate respondsToSelector: @selector(pickerDidSelectYear:)])
             [self.delegate pickerDidSelectYear: _years[_yearIndex]];
@@ -85,16 +85,18 @@ const CGFloat kRowHeight = 30.0;
     UILabel *label = [[UILabel alloc] initWithFrame: CGRectZero];
     label.textAlignment = NSTextAlignmentCenter;
     if (component == kMonthComponent) {
-        label.text = [NSString stringWithFormat: @"%@", _months[row]];
+        label.text = [NSString stringWithFormat: @"%@月", _months[row]];
         label.textColor = kMonthColor;
         label.font = kMonthFont;
-        label.frame = CGRectMake(0, 0, kWinSize.width * 0.5, kRowHeight);
+        label.frame = CGRectMake(0, 0, kWinSize.width * 0.5 - 50, kRowHeight);
+        label.textAlignment = NSTextAlignmentLeft;
     }
     else {
-        label.text = [NSString stringWithFormat: @"%@", _years[row]];
+        label.text = [NSString stringWithFormat: @"%@年", _years[row]];
         label.textColor = kYearColor;
         label.font = kYearFont;
-        label.frame = CGRectMake(kWinSize.width * 0.5, 0, kWinSize.width * 0.5, kRowHeight);
+        label.frame = CGRectMake(kWinSize.width * 0.5 + 50, 0, kWinSize.width * 0.5 - 50, kRowHeight);
+        label.textAlignment = NSTextAlignmentRight;
     }
     return label;
 }
@@ -144,10 +146,10 @@ const CGFloat kRowHeight = 30.0;
     if ([self.delegate respondsToSelector: @selector(pickerDidPressCancelWithInitialValues:)]) {
         [self.delegate pickerDidPressCancelWithInitialValues: _initialValues];
         [self.datePicker selectRow: [_months indexOfObject: _initialValues[@"month"]]
-                       inComponent: 0
+                       inComponent: kMonthComponent
                           animated: NO];
         [self.datePicker selectRow: [_years indexOfObject: _initialValues[@"year"]]
-                       inComponent: 1
+                       inComponent: kYearComponent
                           animated: NO];
     }
     else if ([self.delegate respondsToSelector: @selector(pickerDidPressCancel)]) {
@@ -176,10 +178,10 @@ const CGFloat kRowHeight = 30.0;
     _monthIndex = dateComponents.month - 1;
     
     [_datePicker selectRow: _monthIndex
-               inComponent: 0
+               inComponent: kMonthComponent
                   animated: YES];
     [_datePicker selectRow: _yearIndex
-               inComponent: 1
+               inComponent: kYearComponent
                   animated: YES];
     [self performSelector: @selector(_sendFirstPickerValues) withObject: nil afterDelay: 0.1];
 }
@@ -187,9 +189,9 @@ const CGFloat kRowHeight = 30.0;
 - (void)_sendFirstPickerValues {
     if ([self.delegate respondsToSelector: @selector(pickerDidSelectRow:inComponent:)]) {
         [self.delegate pickerDidSelectRow: [self.datePicker selectedRowInComponent:0]
-                              inComponent: 0];
+                              inComponent: kMonthComponent];
         [self.delegate pickerDidSelectRow: [self.datePicker selectedRowInComponent:1]
-                              inComponent: 1];
+                              inComponent: kYearComponent];
     }
     if ([self.delegate respondsToSelector: @selector(pickerDidSelectMonth:andYear:)])
         [self.delegate pickerDidSelectMonth: _months[_monthIndex]
@@ -265,6 +267,9 @@ const CGFloat kRowHeight = 30.0;
                                         target: self
                                         action: @selector(_done)];
             
+            cancelButton.tintColor = [UIColor colorWithRed:1.0 green:87.0/255.0 blue:34.0/255.0 alpha:1.0];
+            doneBtn.tintColor = [UIColor colorWithRed:1.0 green:87.0/255.0 blue:34.0/255.0 alpha:1.0];
+            
             toolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
             [toolbar setItems: @[cancelButton, flexSpace, doneBtn]
                      animated: YES];
@@ -311,12 +316,12 @@ const CGFloat kRowHeight = 30.0;
 
 - (void)setMonth:(NSString *)month {
     _monthIndex = [_months indexOfObject:month];
-    [_datePicker selectRow:_monthIndex inComponent:0 animated:NO];
+    [_datePicker selectRow:_monthIndex inComponent:kMonthComponent animated:NO];
 }
 
 - (void)setYear:(NSString *)year {
     _yearIndex = [_years indexOfObject:year];
-    [_datePicker selectRow:_yearIndex inComponent:1 animated:NO];
+    [_datePicker selectRow:_yearIndex inComponent:kYearComponent animated:NO];
 }
 
 
